@@ -1,0 +1,2 @@
+pour lancer les tests dintegration 
+npm run test:int
