@@ -1,3 +1,4 @@
+import { Webinar } from 'src/webinars/entities/webinar.entity';
 // Test d'intégration
 // C. Ecriture de notre premier test d'intégration
 
@@ -81,6 +82,62 @@ describe('PrismaWebinarRepository', () => {
             });
         });
     });
+
+    describe('Scenario : repository.findById', () => {
+        it('should find a webinar', async () => {
+        //Arrange
+        const webinar = new Webinar({
+            id: 'webinar-id',
+            organizerId: 'organizer-id',
+            title: 'Webinar title',
+            startDate: new Date('2022-01-01T00:00:00Z'),
+            endDate: new Date('2022-01-01T01:00:00Z'),
+            seats: 100,
+        });
+
+        // Act 
+        await repository.create(webinar);
+
+        const findWebinar = await prismaClient.webinar.findUnique({
+            where: { id: 'webinar-id' },
+        });
+
+        // Assert
+        expect(findWebinar).toEqual(
+            {
+                id:'webinar-id',
+                organizerId: 'organizer-id',
+                title: 'Webinar title',
+                startDate: new Date('2022-01-01T00:00:00Z'),
+                endDate: new Date('2022-01-01T01:00:00Z'),
+                seats: 100,
+            }
+        );
+                
+        });
+    });
+
+    describe('Scenario : repository.update', () => {
+        it('should update a webinar', async () => {
+            //Arrange
+        const webinar = new Webinar({
+            id: 'webinar-id',
+            organizerId: 'organizer-id',
+            title: 'Webinar title',
+            startDate: new Date('2022-01-00T00:00:00Z'),
+            endDate: new Date('2022-01-01T01:00:00Z'),
+            seats: 100,
+        });
+
+        // Act 
+        await repository.update(webinar);
+        const updateWebinar = await prismaClient.Webinar.findUnique({
+            where: { id: 'webinar-id' },
+        });
+
+        // Assert
+
+       
 
 });
 
