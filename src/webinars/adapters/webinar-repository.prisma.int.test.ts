@@ -8,9 +8,9 @@ import {
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
 import { exec } from 'child_process';
-import { PrismaWebinarRepository } from 'src/webinars/adapters/webinar-repository.prisma';
-import { Webinar } from 'src/webinars/entities/webinar.entity';
 import { promisify } from 'util';
+import { PrismaWebinarRepository } from 'src/webinars/adapters/webinar-repository.prisma';
+
 const asyncExec = promisify(exec);
 
 describe('PrismaWebinarRepository', () => {
@@ -83,61 +83,63 @@ describe('PrismaWebinarRepository', () => {
         });
     });
 
-    describe('Scenario : repository.findById', () => {
-        it('should find a webinar', async () => {
-        //Arrange
-        const webinar = new Webinar({
-            id: 'webinar-id',
-            organizerId: 'organizer-id',
-            title: 'Webinar title',
-            startDate: new Date('2022-01-01T00:00:00Z'),
-            endDate: new Date('2022-01-01T01:00:00Z'),
-            seats: 100,
-        });
+   describe('Scenario : repository.findById', () => {
+    it('should find a webinar', async () => {
+      // ARRANGE
+      const webinar = new Webinar({
+        id: 'webinar-id',
+        organizerId: 'organizer-id',
+        title: 'Webinar title',
+        startDate: new Date('2022-01-10T00:00:00Z'),
+        endDate: new Date('2022-01-10T01:00:00Z'),
+        seats: 100,
+      });
+      // create the webinar
+      await repository.create(webinar);
 
-        // Act 
-        await repository.create(webinar);
+      // ACT use repo
+      const foundWebinar = await repository.findById('webinar-id');
 
-        const findWebinar = await prismaClient.webinar.findUnique({
-            where: { id: 'webinar-id' },
-        });
-
-        // Assert
-        expect(findWebinar).toEqual(
-            {
-                id:'webinar-id',
-                organizerId: 'organizer-id',
-                title: 'Webinar title',
-                startDate: new Date('2022-01-01T00:00:00Z'),
-                endDate: new Date('2022-01-01T01:00:00Z'),
-                seats: 100,
-            }
-        );
-                
-        });
+      // ASSERT
+      // Note : foundWebinar est une Entity, on compare ses props ou l'objet entier
+      expect(foundWebinar?.props).toEqual({
+        id: 'webinar-id',
+        organizerId: 'organizer-id',
+        title: 'Webinar title',
+        startDate: new Date('2022-01-10T00:00:00Z'),
+        endDate: new Date('2022-01-10T01:00:00Z'),
+        seats: 100,
+      });
     });
+  });
 
-    describe('Scenario : repository.update', () => {
-        it('should update a webinar', async () => {
-            //Arrange
-        const webinar = new Webinar({
-            id: 'webinar-id',
-            organizerId: 'organizer-id',
-            title: 'Webinar title',
-            startDate: new Date('2022-01-00T00:00:00Z'),
-            endDate: new Date('2022-01-01T01:00:00Z'),
-            seats: 100,
-        });
+  describe('Scenario : repository.update', () => {
+    it('should update a webinar', async () => {
+      // ARRANGE
+      const webinar = new Webinar({
+        id: 'webinar-id',
+        organizerId: 'organizer-id',
+        title: 'Webinar title',
+        startDate: new Date('2022-01-10T00:00:00Z'),
+        endDate: new Date('2022-01-10T01:00:00Z'),
+        seats: 100,
+      });
+      
+      await repository.create(webinar);
 
-        // Act 
-        await repository.update(webinar);
-        const updateWebinar = await prismaClient.Webinar.findUnique({
-            where: { id: 'webinar-id' },
-        });
+      webinar.update({ seats: 200 });
 
-        // Assert
+      // ACT
+      await repository.update(webinar);
 
-       
+      // ASSERT on verifie la modification
+      const updatedWebinar = await prismaClient.webinar.findUnique({
+        where: { id: 'webinar-id' },
+      });
+
+      expect(updatedWebinar?.seats).toBe(200);
+    });
+  });
 
 });
 
