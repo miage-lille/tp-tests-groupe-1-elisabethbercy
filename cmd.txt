@@ -1,0 +1,5 @@
+pour demarer les tests unitaires 
+npm run test:watch 
+
+pour lancer les tests dintegration 
+npm run test:int
