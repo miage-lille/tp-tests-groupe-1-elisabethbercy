@@ -33,7 +33,14 @@ export class TestServerFixture {
       },
     });
 
-    await asyncExec(`DATABASE_URL=${dbUrl} npx prisma migrate deploy`);
+    //await asyncExec(`DATABASE_URL=${dbUrl} npx prisma migrate deploy`);
+    //for windows
+    await asyncExec(`npx prisma migrate deploy`, {
+      env: {
+        ...process.env,
+        DATABASE_URL: dbUrl,
+      },
+    });
     await this.prismaClient.$connect();
 
     // Initialiser le conteneur avec Prisma
@@ -53,6 +60,10 @@ export class TestServerFixture {
   getServer() {
     return this.serverInstance.server;
   }
+  getAppContainer() {
+    return this.appContainer;
+  }
+
 
   async stop() {
     if (this.serverInstance) await this.serverInstance.close();

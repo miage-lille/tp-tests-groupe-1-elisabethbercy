@@ -35,12 +35,19 @@ describe('PrismaWebinarRepository', () => {
         });
 
         // Run migrations to populate the database
-        await asyncExec(`DATABASE_URL=${dbUrl} npx prisma migrate deploy`);
+        //await asyncExec(`DATABASE_URL=${dbUrl} npx prisma migrate deploy`);
+        //for windows
+        await asyncExec(`npx prisma migrate deploy`, {
+          env: {
+            ...process.env,
+            DATABASE_URL: dbUrl,
+          },
+        });
 
         return prismaClient.$connect();
 
         
-    });
+    }, 60000);
     
     beforeEach(async () => {
         repository = new PrismaWebinarRepository(prismaClient);
@@ -49,9 +56,14 @@ describe('PrismaWebinarRepository', () => {
     });
 
     afterAll(async () => {
-    await container.stop({ timeout: 1000 });
-    return prismaClient.$disconnect();
-    });
+    // Sécurité : on n'arrête que si ça a bien démarré
+    if (container) {
+        await container.stop({ timeout: 1000 });
+    }
+    if (prismaClient) {
+        await prismaClient.$disconnect();
+    }
+   });
 
     describe('Scenario : repository.create', () => {
         it('should create a webinar', async () => {
