@@ -99,7 +99,79 @@ describe('Feature : Change seats', () => {
     });
   });
 
+  //scenario webinaire nexiste pas
+  describe('Scenario: webinar does not exist', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'unknown-webinar-id',
+      seats: 200,
+    };
 
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(
+        WebinarNotFoundException,
+      );
+    });
+  });
+
+  //scenario mettre a jour une webinaire qui nest pas le sien
+  describe('Scenario: update the webinar of someone else', () => {
+    const payload = {
+      user: testUser.bob, // Bob essaie de modifier le webinaire d'Alice
+      webinarId: 'webinar-id',
+      seats: 200,
+    };
+
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(
+        WebinarNotOrganizerException,
+      );
+    });
+  });
+
+  describe('Scenario: change seat to an inferior number', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'webinar-id',
+      seats: 50, // 50 < 100
+    };
+
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(
+        WebinarReduceSeatsException,
+      );
+    });
+  });
+
+  //scenario reduire le nombre de siège en dessous du nombre de participant déjà inscrit
+  describe('Scenario: change seat to an inferior number', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'webinar-id',
+      seats: 50, // 50 < 100
+    };
+
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(
+        WebinarReduceSeatsException,
+      );
+    });
+  });
+
+  //scenario mettre un nombre de siège supérieur à 1000
+  describe('Scenario: change seat to a number > 1000', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'webinar-id',
+      seats: 1001,
+    };
+
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(
+        WebinarTooManySeatsException,
+      );
+    });
+  });
 
 });
 
